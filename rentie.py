@@ -1,7 +1,13 @@
+import re
+
 from bs4 import BeautifulSoup
 import csv
 import requests
+from decimal import Decimal
 
+
+def strip_to_decimal(decimal):
+    return Decimal(re.sub(r'[^\d.]', '', decimal))
 
 # gets the source html from the webpage
 def find_property_rent():
@@ -9,6 +15,7 @@ def find_property_rent():
     source_html = requests.get(webpage).text
     soup = BeautifulSoup(source_html, 'lxml')
     div_pages = soup.find_all('div', id='pages')
+    properties = soup.find_all('div', class_='search_result')
     page_in_html = []
 
     # I'm not sure why I have to do this but its the only way I can get it to work
@@ -21,9 +28,6 @@ def find_property_rent():
     # used to loop through all pages on rent.ie
     pages = list(range(int(last_page)))
 
-    # initialize empty string
-    append_to_url = ""
-
     for page in pages:
         # append the relevant string to url to move to next page while not on the first page
         data_csv = 'rent_ie.csv'
@@ -31,7 +35,7 @@ def find_property_rent():
         if page == 0:
             file = open('rent_ie.csv', 'w')
             writer = csv.writer(file)
-            writer.writerow(['Address', 'Prices', 'Capacity', 'Time Posted', 'Link'])
+            writer.writerow(['Address', 'Price per month €', 'Capacity', 'Link'])
         else:
             append_to_url = f'page_{page + 1}'
             file = open(data_csv, 'a')
@@ -47,18 +51,17 @@ def find_property_rent():
             title = house.find('div', class_='sresult_address')
             # in position due to weird formatting from rent.ie
             price = description[1]
-            if 'monthly' in price:
-                price.replace('monthly','per month')
-            elif 'weekly' in price:
-                price.replace('weekly', 'per week')
+            if 'weekly' in price:
+                price_decimal = 4 * strip_to_decimal(price)
+            else:
+                price_decimal = strip_to_decimal(price)
 
             capacity = description[2]
-            posted = description[4]
             address = title.a.text.strip()
             link = title.a['href']
 
             writer.writerow(
-                [address, price, capacity, posted, link])
+                [address, price_decimal, capacity, link])
 
         file.close()
 

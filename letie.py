@@ -5,6 +5,10 @@ import requests
 from decimal import Decimal
 
 
+def strip_to_decimal(decimal):
+    return Decimal(re.sub(r'[^\d.]', '', decimal))
+
+
 def find_property_let():
     webpage = 'https://www.let.ie/property-to-rent/renting_dublin/'
     source_html = requests.get(webpage).text
@@ -23,7 +27,7 @@ def find_property_let():
         if first_page:
             file = open(data_csv, 'w')
             writer = csv.writer(file)
-            writer.writerow(['Address', '€ monthly', 'Capacity', 'Link'])
+            writer.writerow(['Address', 'Price per month €', 'Capacity', 'Link'])
         else:
             append_to_url = f'pg_{page+1}/'
             file = open(data_csv, 'a')
@@ -43,12 +47,12 @@ def find_property_let():
                 price_test = description.find('strong')
                 if price_test is not None:
                     price = price_test.text.strip().split(' ')
-                    euros = Decimal(re.sub(r'[^\d.]', '', price[0]))
+                    price_decimal = strip_to_decimal(price[0])
                     payment_type = price[1]
                     if payment_type == 'weekly':
-                        euros = euros*4
+                        price_decimal *= 4
                 capacity = header_info[1].text.strip()
-                writer.writerow([address, euros, capacity, link])
+                writer.writerow([address, price_decimal, capacity, link])
 
 
 find_property_let()

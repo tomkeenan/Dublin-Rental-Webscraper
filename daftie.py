@@ -3,6 +3,11 @@ from bs4 import BeautifulSoup
 import csv
 import requests
 from selenium import webdriver
+from decimal import Decimal
+
+
+def strip_to_decimal(decimal):
+    return Decimal(re.sub(r'[^\d.]', '', decimal))
 
 
 # gets the source html from the webpage
@@ -29,7 +34,7 @@ def find_property_daft():
         if first_page:
             file = open(data_csv, 'w')
             writer = csv.writer(file)
-            writer.writerow(['Address', 'Prices', 'Capacity', 'Link'])
+            writer.writerow(['Address', 'Price per month €', 'Capacity', 'Link'])
         else:
             append_to_url = f'from={(page * 20)}'
             file = open(data_csv, 'a')
@@ -60,12 +65,20 @@ def find_property_daft():
             # per is included in the regular style price
             # if it is not included it is the alternative style
             if ' per ' in price_html:
-                price.append(price_html)
+                if 'week' in price_html:
+                    price_decimal = 4 * strip_to_decimal(price_html)
+                else:
+                    price_decimal = strip_to_decimal(price_html)
+                price.append(price_decimal)
             else:
                 alternative_layout = True
                 sub_prices = house.find_all("p", re.compile("SubUnit__Title-"))
                 for sub_price in sub_prices:
-                    price.append(sub_price.text)
+                    if 'week' in sub_price.text:
+                        price_decimal = 4 * strip_to_decimal(sub_price.text)
+                    else:
+                        price_decimal = strip_to_decimal(sub_price.text)
+                    price.append(price_decimal)
 
             # there are multiple listings if there is more than one element in price
             multiple_listing = len(price) > 1
@@ -91,7 +104,6 @@ def find_property_daft():
                 link.append("https://www.daft.ie/" + house.a['href'])
 
             for i in range(len(price)):
-                #print(f"Address: {address}\nPrice: {price[i]}\nCapacity: {capacity[i]}\nLink: {link[i]}\n")
                 writer.writerow([address, price[i], capacity[i], link[i]])
 
         browser.close()

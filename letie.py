@@ -50,7 +50,13 @@ class Let:
                         if payment_type == 'weekly':
                             price_decimal *= 4
                     capacity = header_info[1].text.strip()
-                    writer.writerow([address, price_decimal, capacity, link])
+                    if 'bedroom' in capacity:
+                        beds = capacity[0]
+                    elif 'studio' in capacity:
+                        beds = 1
+                    else:
+                        beds = 0
+                    writer.writerow([address, price_decimal,beds, capacity, link])
         file.close()
 
 

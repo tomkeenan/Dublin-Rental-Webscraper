@@ -75,11 +75,11 @@ class Daft:
 
                 # there are multiple listings if there is more than one element in price
                 multiple_listing = len(price) > 1
-
+                beds = []
                 if multiple_listing or alternative_layout:
                     sub_capacities = house.find_all("div", re.compile("SubUnit__CardInfoItem"))
-                    for sub_capacities in sub_capacities:
-                        capacity.append(sub_capacities.text.replace(" · ", ", "))
+                    for sub_capacity in sub_capacities:
+                        capacity.append(sub_capacity.text.replace(" · ", ", "))
 
                     # trims empty white space from list
                     capacity = [elem for elem in capacity if elem.strip()]
@@ -94,9 +94,19 @@ class Daft:
                         else:
                             temp += feature.text
                     capacity.append(temp)
+                    print(temp)
                     link.append("https://www.daft.ie/" + house.a['href'])
 
+                beds = []
+                for ele in capacity:
+                    if 'Bed' in ele:
+                        beds.append(ele[0])
+                    elif 'Studio' in ele:
+                        beds.append(1)
+                    else:
+                        beds.append(0)
+
                 for i in range(len(price)):
-                    writer.writerow([address, price[i], capacity[i], link[i]])
+                    writer.writerow([address, price[i],beds[i], capacity[i], link[i]])
             browser.close()
         file.close()

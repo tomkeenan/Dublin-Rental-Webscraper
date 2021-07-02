@@ -38,7 +38,7 @@ class Rent:
             if page == 0:
                 file = open(self.csv_file, 'w')
                 writer = csv.writer(file)
-                writer.writerow(['Address', 'Price per month €', 'Capacity', 'Link'])
+                writer.writerow(['Address', 'Price per month €', 'Beds', 'Capacity', 'Link'])
             else:
                 append_to_url = f'page_{page + 1}'
                 file = open(self.csv_file, 'a')
@@ -62,7 +62,11 @@ class Rent:
                 capacity = description[2]
                 address = title.a.text.strip()
                 link = title.a['href']
+                if 'studio' in capacity:
+                    beds = 1
+                else:
+                    beds = capacity.split(' ')[0]
 
                 writer.writerow(
-                    [address, price_decimal, capacity, link])
+                    [address, price_decimal, beds, capacity, link])
             file.close()

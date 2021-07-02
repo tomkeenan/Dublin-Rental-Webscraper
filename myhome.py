@@ -72,5 +72,11 @@ class MyHome:
                             capacity += info.text.strip()
                         else:
                             capacity += info.text.strip() + ', '
-                    writer.writerow([address, price_decimal, capacity, link])
+
+                    if 'bed' in capacity:
+                        beds = capacity[0]
+                    else:
+                        beds = 0
+
+                    writer.writerow([address, price_decimal,beds, capacity, link])
         file.close()

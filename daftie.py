@@ -1,7 +1,6 @@
 import re
 from bs4 import BeautifulSoup
 import csv
-import requests
 from selenium import webdriver
 from decimal import Decimal
 
@@ -99,6 +98,5 @@ class Daft:
 
                 for i in range(len(price)):
                     writer.writerow([address, price[i], capacity[i], link[i]])
-
             browser.close()
         file.close()

@@ -44,6 +44,8 @@ class Daft:
             for house in properties:
                 price_html = house.find("div", re.compile("TitleBlock__Price")).span.text
                 address = house.find("p", re.compile("TitleBlock__Address")).text
+                if 'Dublin' not in address:
+                    address += ', Dublin'
                 capacity_html = house.find_all("p", re.compile("TitleBlock__CardInfoItem"))
 
                 # list used as daft as an inconsistent style on its listings
@@ -94,7 +96,6 @@ class Daft:
                         else:
                             temp += feature.text
                     capacity.append(temp)
-                    print(temp)
                     link.append("https://www.daft.ie/" + house.a['href'])
 
                 beds = []

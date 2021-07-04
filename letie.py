@@ -41,6 +41,8 @@ class Let:
                 if description is not None:
                     header_info = header.find_all('a')
                     address = header_info[0].text.strip()
+                    if 'Dublin' not in address:
+                        address += ', Dublin'
                     link = header_info[0]['href']
                     price_test = description.find('strong')
                     if price_test is not None:

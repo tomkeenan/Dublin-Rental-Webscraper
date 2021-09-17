@@ -4,6 +4,8 @@ import csv
 from selenium import webdriver
 from decimal import Decimal
 
+from selenium.webdriver.chrome.options import Options
+
 
 def strip_to_decimal(decimal):
     return Decimal(re.sub(r'[^\d.]', '', decimal))
@@ -16,7 +18,10 @@ class Daft:
     # gets the source html from the webpage
     def find_properties(self):
         webpage = 'https://www.daft.ie/property-for-rent/dublin?sort=priceAsc&pageSize=20'
-        browser = webdriver.Chrome('/usr/local/bin/chromedriver')
+        opts = Options()
+        opts.headless = True
+        browser = webdriver.Chrome('/usr/local/bin/chromedriver',options=opts)
+        # browser = webdriver.Chrome('/usr/local/bin/chromedriver')
         browser.get(webpage)
         soup = BeautifulSoup(browser.page_source, 'lxml')
         pages_in_html = soup.find('div', class_=re.compile("Pagination__StyledPagination-sc-")).find_all('span')
@@ -34,7 +39,9 @@ class Daft:
                 append_to_url = f'&from={(page * 20)}'
                 # add append string to navigate to next page of website
                 webpage = f'https://www.daft.ie/property-for-rent/dublin?sort=priceAsc&pageSize=20{append_to_url}'
-                browser = webdriver.Chrome('/usr/local/bin/chromedriver')
+                opts = Options()
+                opts.headless = True
+                browser = webdriver.Chrome('/usr/local/bin/chromedriver',options=opts)
                 browser.get(webpage)
                 soup = BeautifulSoup(browser.page_source, 'lxml')
 
